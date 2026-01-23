@@ -63,13 +63,13 @@ export default function Navbar() {
 
             {/* Right: CTA */}
             <div className="flex items-center gap-4">
-                <button className={clsx(
+                <Link href="/buy" className={clsx(
                     "px-4 py-1.5 rounded-full text-xs font-semibold text-white",
                     "bg-gradient-to-r from-accent-blue via-accent-blue to-accent-cyan",
                     "hover:shadow-[0_0_15px_rgba(0,80,255,0.5)] transition-shadow duration-300"
                 )}>
                     Buy
-                </button>
+                </Link>
             </div>
         </motion.nav>
     );

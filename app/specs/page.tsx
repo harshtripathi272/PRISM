@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import Navbar from "@/components/UI/Navbar";
 import Footer from "@/components/UI/Footer";
 
@@ -135,9 +136,9 @@ export default function SpecsPage() {
                         <h2 className="text-4xl md:text-6xl font-semibold text-white mb-6">
                             Ready to upgrade?
                         </h2>
-                        <button className="px-10 py-4 rounded-full bg-white text-black font-semibold text-base transition-transform duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)]">
+                        <Link href="/buy" className="inline-block px-10 py-4 rounded-full bg-white text-black font-semibold text-base transition-transform duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)]">
                             Buy Prism
-                        </button>
+                        </Link>
                     </motion.div>
                 </section>
             </main>
