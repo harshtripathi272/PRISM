@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import NextImage from "next/image";
 import Navbar from "@/components/UI/Navbar";
 import Footer from "@/components/UI/Footer";
 
@@ -60,11 +61,13 @@ export default function AboutPage() {
                                 is engineered to elevate your audio experience to new heights.
                             </p>
                         </div>
-                        <div className="aspect-square bg-gradient-to-br from-accent-blue/20 to-accent-cyan/20 rounded-2xl flex items-center justify-center border border-white/10">
-                            <div className="text-center">
-                                <div className="text-8xl font-bold text-white/10 mb-4">PRISM</div>
-                                <p className="text-white/40 text-sm">Visual placeholder</p>
-                            </div>
+                        <div className="aspect-square relative rounded-2xl overflow-hidden border border-white/10">
+                            <NextImage
+                                src="/processed-image (2).png"
+                                alt="Prism Earbuds Design"
+                                fill
+                                className="object-cover transition-transform duration-700 hover:scale-110"
+                            />
                         </div>
                     </motion.div>
                 </section>

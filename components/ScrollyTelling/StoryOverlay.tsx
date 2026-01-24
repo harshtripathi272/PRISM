@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion, useScroll, useTransform, Variants } from "framer-motion";
 import clsx from "clsx";
 
@@ -256,12 +257,12 @@ export default function StoryOverlay() {
             variants={fadeUp}
             className="flex flex-col sm:flex-row items-center gap-5 pointer-events-auto"
           >
-            <button className="px-10 py-4 rounded-full bg-white text-black font-semibold text-base transition-transform duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)]">
+            <Link href="/buy" className="px-10 py-4 rounded-full bg-white text-black font-semibold text-base transition-transform duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)]">
               Experience Prism
-            </button>
-            <button className="text-white/50 hover:text-white transition-colors font-medium">
+            </Link>
+            <Link href="/specs" className="text-white/50 hover:text-white transition-colors font-medium">
               View Specs →
-            </button>
+            </Link>
           </motion.div>
         </motion.div>
       </Section>

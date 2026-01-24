@@ -42,7 +42,7 @@ const pricingTiers = [
 ];
 
 export default function BuyPage() {
-    const [selectedColor, setSelectedColor] = useState(colorVariants[0]);
+    const [selectedColor, setSelectedColor] = useState(colorVariants[1]);
     const [selectedTier, setSelectedTier] = useState(pricingTiers[1]);
     const [quantity, setQuantity] = useState(1);
     const [showCheckout, setShowCheckout] = useState(false);
@@ -92,15 +92,17 @@ export default function BuyPage() {
                             >
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <div className={`w-64 h-64 rounded-full blur-3xl opacity-30 bg-gradient-to-r 
-                                        ${selectedColor.id === 'black' ? 'from-accent-blue to-accent-cyan' : 
-                                          selectedColor.id === 'silver' ? 'from-blue-400 to-cyan-300' : 
-                                          'from-blue-200 to-cyan-200'}`} 
+                                        ${selectedColor.id === 'black' ? 'from-accent-blue to-accent-cyan' :
+                                            selectedColor.id === 'silver' ? 'from-blue-400 to-cyan-300' :
+                                                'from-blue-200 to-cyan-200'}`}
                                     />
                                 </div>
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="text-6xl md:text-8xl font-bold" 
-                                         style={{ color: selectedColor.color, 
-                                                 textShadow: '0 0 40px rgba(0,80,255,0.3)' }}>
+                                    <div className="text-6xl md:text-8xl font-bold"
+                                        style={{
+                                            color: selectedColor.color,
+                                            textShadow: '0 0 40px rgba(0,80,255,0.3)'
+                                        }}>
                                         PRISM
                                     </div>
                                 </div>
@@ -124,10 +126,10 @@ export default function BuyPage() {
                                     className="group relative"
                                 >
                                     <div className={`w-16 h-16 rounded-full border-2 transition-all duration-300
-                                        ${selectedColor.id === variant.id 
-                                            ? 'border-accent-cyan scale-110 shadow-[0_0_20px_rgba(0,214,255,0.5)]' 
+                                        ${selectedColor.id === variant.id
+                                            ? 'border-accent-cyan scale-110 shadow-[0_0_20px_rgba(0,214,255,0.5)]'
                                             : 'border-white/20 hover:border-white/40 hover:scale-105'}`}
-                                         style={{ backgroundColor: variant.color }}
+                                        style={{ backgroundColor: variant.color }}
                                     />
                                     <span className={`absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap
                                         transition-colors ${selectedColor.id === variant.id ? 'text-accent-cyan' : 'text-white/50'}`}>
@@ -164,8 +166,8 @@ export default function BuyPage() {
                                 viewport={{ once: true }}
                                 onClick={() => setSelectedTier(tier)}
                                 className={`relative p-8 rounded-2xl border-2 cursor-pointer transition-all duration-300
-                                    ${selectedTier.id === tier.id 
-                                        ? 'border-accent-cyan bg-secondary/50 shadow-[0_0_30px_rgba(0,214,255,0.2)]' 
+                                    ${selectedTier.id === tier.id
+                                        ? 'border-accent-cyan bg-secondary/50 shadow-[0_0_30px_rgba(0,214,255,0.2)]'
                                         : 'border-white/10 bg-secondary/20 hover:border-white/20 hover:bg-secondary/30'}`}
                             >
                                 {tier.badge && (
@@ -367,18 +369,18 @@ export default function BuyPage() {
                         className="grid md:grid-cols-3 gap-8 py-16 border-t border-white/5"
                     >
                         <div className="text-center">
-                            <div className="text-4xl mb-3">🚚</div>
-                            <h4 className="text-white font-semibold mb-2">Free Shipping</h4>
+                            <div className="text-4xl mb-3"></div>
+                            <h2 className="text-white font-semibold mb-2">Free Shipping</h2>
                             <p className="text-white/50 text-sm">Worldwide delivery included</p>
                         </div>
                         <div className="text-center">
-                            <div className="text-4xl mb-3">🔒</div>
-                            <h4 className="text-white font-semibold mb-2">Secure Payment</h4>
+                            <div className="text-4xl mb-3"></div>
+                            <h2 className="text-white font-semibold mb-2">Secure Payment</h2>
                             <p className="text-white/50 text-sm">SSL encrypted checkout</p>
                         </div>
                         <div className="text-center">
-                            <div className="text-4xl mb-3">↩️</div>
-                            <h4 className="text-white font-semibold mb-2">30-Day Returns</h4>
+                            <div className="text-4xl mb-3"></div>
+                            <h2 className="text-white font-semibold mb-2">30-Day Returns</h2>
                             <p className="text-white/50 text-sm">Risk-free satisfaction guarantee</p>
                         </div>
                     </motion.div>
