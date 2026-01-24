@@ -46,8 +46,19 @@ export default function BuyPage() {
     const [selectedTier, setSelectedTier] = useState(pricingTiers[1]);
     const [quantity, setQuantity] = useState(1);
     const [showCheckout, setShowCheckout] = useState(false);
+    const [purchaseStatus, setPurchaseStatus] = useState<'idle' | 'processing' | 'success'>('idle');
 
     const totalPrice = selectedTier.price * quantity;
+
+    const handlePurchase = () => {
+        setPurchaseStatus('processing');
+        // Simulate API call
+        setTimeout(() => {
+            setPurchaseStatus('success');
+            // Scroll to top of form
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 2000);
+    };
 
     return (
         <div className="bg-primary min-h-screen">
@@ -260,100 +271,134 @@ export default function BuyPage() {
                             className="max-w-3xl mx-auto px-6 md:px-12 mb-20 overflow-hidden"
                         >
                             <div className="bg-secondary/30 border border-white/10 rounded-2xl p-8">
-                                <h3 className="text-2xl font-semibold text-white mb-6">Checkout Details</h3>
-                                <p className="text-white/40 text-sm mb-8">
-                                    Note: This is a demo checkout form. No actual payment will be processed.
-                                </p>
+                                {purchaseStatus === 'success' ? (
+                                    <div className="text-center py-12">
+                                        <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                            <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-3xl font-bold text-white mb-4">Order Confirmed!</h3>
+                                        <p className="text-white/60 mb-8">
+                                            Thank you for your purchase. Your order number is <span className="text-accent-cyan font-mono">#PRISM-{Math.floor(Math.random() * 10000)}</span>.
+                                        </p>
+                                        <p className="text-white/40 text-sm">
+                                            A confirmation email has been sent to your provided email address.
+                                        </p>
+                                        <button
+                                            onClick={() => window.location.reload()}
+                                            className="mt-8 px-8 py-3 rounded-full border border-white/20 text-white hover:bg-white/10 transition-colors"
+                                        >
+                                            Continue Shopping
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <h3 className="text-2xl font-semibold text-white mb-6">Checkout Details</h3>
+                                        <p className="text-white/40 text-sm mb-8">
+                                            All transactions are secure and encrypted.
+                                        </p>
 
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    {/* Contact Information */}
-                                    <div className="md:col-span-2">
-                                        <h4 className="text-white font-medium mb-4">Contact Information</h4>
-                                    </div>
-                                    <div>
-                                        <label className="block text-white/70 text-sm mb-2">First Name</label>
-                                        <input
-                                            type="text"
-                                            placeholder="John"
-                                            className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
-                                                text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
-                                                transition-colors"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-white/70 text-sm mb-2">Last Name</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Doe"
-                                            className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
-                                                text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
-                                                transition-colors"
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="block text-white/70 text-sm mb-2">Email</label>
-                                        <input
-                                            type="email"
-                                            placeholder="john.doe@example.com"
-                                            className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
-                                                text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
-                                                transition-colors"
-                                        />
-                                    </div>
+                                        <div className="grid md:grid-cols-2 gap-6">
+                                            {/* Contact Information */}
+                                            <div className="md:col-span-2">
+                                                <h4 className="text-white font-medium mb-4">Contact Information</h4>
+                                            </div>
+                                            <div>
+                                                <label className="block text-white/70 text-sm mb-2">First Name</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="John"
+                                                    className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
+                                                        text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
+                                                        transition-colors"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-white/70 text-sm mb-2">Last Name</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Doe"
+                                                    className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
+                                                        text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
+                                                        transition-colors"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-white/70 text-sm mb-2">Email</label>
+                                                <input
+                                                    type="email"
+                                                    placeholder="john.doe@example.com"
+                                                    className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
+                                                        text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
+                                                        transition-colors"
+                                                />
+                                            </div>
 
-                                    {/* Shipping Address */}
-                                    <div className="md:col-span-2 mt-6">
-                                        <h4 className="text-white font-medium mb-4">Shipping Address</h4>
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="block text-white/70 text-sm mb-2">Street Address</label>
-                                        <input
-                                            type="text"
-                                            placeholder="123 Main Street"
-                                            className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
-                                                text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
-                                                transition-colors"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-white/70 text-sm mb-2">City</label>
-                                        <input
-                                            type="text"
-                                            placeholder="San Francisco"
-                                            className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
-                                                text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
-                                                transition-colors"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-white/70 text-sm mb-2">Postal Code</label>
-                                        <input
-                                            type="text"
-                                            placeholder="94102"
-                                            className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
-                                                text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
-                                                transition-colors"
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <label className="block text-white/70 text-sm mb-2">Country</label>
-                                        <input
-                                            type="text"
-                                            placeholder="United States"
-                                            className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
-                                                text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
-                                                transition-colors"
-                                        />
-                                    </div>
-                                </div>
+                                            {/* Shipping Address */}
+                                            <div className="md:col-span-2 mt-6">
+                                                <h4 className="text-white font-medium mb-4">Shipping Address</h4>
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-white/70 text-sm mb-2">Street Address</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="123 Main Street"
+                                                    className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
+                                                        text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
+                                                        transition-colors"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-white/70 text-sm mb-2">City</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="San Francisco"
+                                                    className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
+                                                        text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
+                                                        transition-colors"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-white/70 text-sm mb-2">Postal Code</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="94102"
+                                                    className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
+                                                        text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
+                                                        transition-colors"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-white/70 text-sm mb-2">Country</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="United States"
+                                                    className="w-full px-4 py-3 bg-primary/50 border border-white/10 rounded-lg 
+                                                        text-white placeholder-white/30 focus:border-accent-cyan focus:outline-none 
+                                                        transition-colors"
+                                                />
+                                            </div>
+                                        </div>
 
-                                <button
-                                    className="w-full mt-8 py-4 rounded-full bg-white text-black font-semibold text-lg 
-                                        transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] 
-                                        hover:scale-[1.02]"
-                                >
-                                    Complete Purchase (Demo)
-                                </button>
+                                        <button
+                                            onClick={handlePurchase}
+                                            disabled={purchaseStatus === 'processing'}
+                                            className="w-full mt-8 py-4 rounded-full bg-white text-black font-semibold text-lg 
+                                                transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] 
+                                                hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                        >
+                                            {purchaseStatus === 'processing' ? (
+                                                <>
+                                                    <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                                                    Processing...
+                                                </>
+                                            ) : (
+                                                'Complete Purchase'
+                                            )}
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </motion.section>
                     )}
