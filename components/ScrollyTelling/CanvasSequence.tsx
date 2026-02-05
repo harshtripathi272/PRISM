@@ -1,34 +1,32 @@
 "use client";
 
 import { useRef, useEffect, useState, useCallback } from "react";
-import { useScroll, useSpring, useMotionValueEvent } from "framer-motion";
+import { useScroll, useSpring } from "framer-motion";
 
 interface CanvasSequenceProps {
   frameCount: number;
 }
 
-// Configuration for progressive loading
-const INITIAL_LOAD_COUNT = 80;   // Load first 80 frames immediately
-const CHUNK_SIZE = 60;           // Load 60 frames at a time
-const PRELOAD_BUFFER = 120;      // Stay 120 frames ahead of current position
+// Load first 100 frames before showing content, then load rest in background
+const INITIAL_LOAD_COUNT = 100;
 
 export default function CanvasSequence({ frameCount }: CanvasSequenceProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const imagesRef = useRef<(HTMLImageElement | null)[]>(new Array(frameCount).fill(null));
-  const loadingChunksRef = useRef<Set<number>>(new Set());
   const lastFrameRef = useRef<number>(-1);
   const dimensionsRef = useRef({ width: 0, height: 0, dpr: 1 });
-  
+
   const [loadedCount, setLoadedCount] = useState(0);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [allLoaded, setAllLoaded] = useState(false);
 
   const { scrollYProgress } = useScroll();
-  
-  // Smoother spring settings - less stiffness = smoother animation
+
+  // Smoother spring settings
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
+    stiffness: 80,
+    damping: 25,
     restDelta: 0.0001
   });
 
@@ -48,7 +46,6 @@ export default function CanvasSequence({ frameCount }: CanvasSequenceProps) {
 
       const img = new Image();
       img.onload = async () => {
-        // Pre-decode the image for smoother canvas drawing
         try {
           await img.decode();
         } catch (e) {
@@ -58,31 +55,15 @@ export default function CanvasSequence({ frameCount }: CanvasSequenceProps) {
         setLoadedCount(prev => prev + 1);
         resolve(img);
       };
-      img.onerror = reject;
+      img.onerror = () => {
+        // On error, still resolve to not block other loads
+        resolve(img);
+      };
       img.src = getImagePath(index);
     });
   }, [getImagePath]);
 
-  // Load a chunk of images
-  const loadChunk = useCallback(async (startIndex: number) => {
-    const chunkId = Math.floor(startIndex / CHUNK_SIZE);
-    
-    if (loadingChunksRef.current.has(chunkId)) return;
-    loadingChunksRef.current.add(chunkId);
-
-    const endIndex = Math.min(startIndex + CHUNK_SIZE, frameCount);
-    const promises: Promise<HTMLImageElement>[] = [];
-
-    for (let i = startIndex; i < endIndex; i++) {
-      if (!imagesRef.current[i]) {
-        promises.push(loadImage(i));
-      }
-    }
-
-    await Promise.all(promises);
-  }, [frameCount, loadImage]);
-
-  // Initial load - load first batch of frames
+  // Phase 1: Load initial frames
   useEffect(() => {
     const loadInitial = async () => {
       const promises: Promise<HTMLImageElement>[] = [];
@@ -96,54 +77,63 @@ export default function CanvasSequence({ frameCount }: CanvasSequenceProps) {
     loadInitial();
   }, [frameCount, loadImage]);
 
-  // Progressive loading based on scroll position - throttled
-  useMotionValueEvent(smoothProgress, "change", (progress) => {
-    const targetFrame = Math.floor(progress * (frameCount - 1));
-    
-    // Preload frames ahead
-    const preloadStart = targetFrame;
-    const preloadEnd = Math.min(targetFrame + PRELOAD_BUFFER, frameCount);
+  // Phase 2: Load ALL remaining frames in background after initial load
+  useEffect(() => {
+    if (!initialLoadComplete) return;
 
-    for (let i = preloadStart; i < preloadEnd; i += CHUNK_SIZE) {
-      const chunkStart = Math.floor(i / CHUNK_SIZE) * CHUNK_SIZE;
-      if (!loadingChunksRef.current.has(Math.floor(chunkStart / CHUNK_SIZE))) {
-        loadChunk(chunkStart);
+    const loadRemaining = async () => {
+      // Load in batches to not overwhelm the browser
+      const BATCH_SIZE = 30;
+
+      for (let batch = INITIAL_LOAD_COUNT; batch < frameCount; batch += BATCH_SIZE) {
+        const promises: Promise<HTMLImageElement>[] = [];
+        const endIndex = Math.min(batch + BATCH_SIZE, frameCount);
+
+        for (let i = batch; i < endIndex; i++) {
+          if (!imagesRef.current[i]) {
+            promises.push(loadImage(i));
+          }
+        }
+
+        await Promise.all(promises);
+
+        // Small delay between batches to keep UI responsive
+        await new Promise(r => setTimeout(r, 50));
       }
-    }
-  });
+
+      setAllLoaded(true);
+    };
+
+    loadRemaining();
+  }, [initialLoadComplete, frameCount, loadImage]);
 
   // Setup canvas and render loop
   useEffect(() => {
     if (!initialLoadComplete || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d", { 
-      alpha: false,  // No transparency = faster rendering
-      desynchronized: true  // Reduce latency on supported browsers
+    const ctx = canvas.getContext("2d", {
+      alpha: false,
+      desynchronized: true
     });
     if (!ctx) return;
-    
+
     ctxRef.current = ctx;
-    
-    const dpr = window.devicePixelRatio || 1;
-    
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2x for performance
+
     const resize = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
-      
+
       canvas.width = width * dpr;
       canvas.height = height * dpr;
-      
+
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
-      
-      // Store dimensions to avoid recalculating every frame
+
       dimensionsRef.current = { width, height, dpr };
-      
-      // Reset scale after resize
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      
-      // Force redraw after resize
       lastFrameRef.current = -1;
     };
 
@@ -151,24 +141,24 @@ export default function CanvasSequence({ frameCount }: CanvasSequenceProps) {
     resize();
 
     let animationId: number;
-    
+
     const render = () => {
       const progress = smoothProgress.get();
       const clampedProgress = Math.min(Math.max(progress, 0), 0.999);
       const frameIndex = Math.floor(clampedProgress * frameCount);
-      
-      // Skip render if same frame (major performance boost!)
+
+      // Skip render if same frame
       if (frameIndex === lastFrameRef.current) {
         animationId = requestAnimationFrame(render);
         return;
       }
-      
-      // Get the image for this frame
+
+      // Get the image - find best available
       let img = imagesRef.current[frameIndex];
-      
-      // If not loaded, find nearest loaded frame
+
       if (!img) {
-        for (let offset = 1; offset < 30; offset++) {
+        // Find nearest loaded frame - search wider range
+        for (let offset = 1; offset < 50; offset++) {
           const prevFrame = imagesRef.current[frameIndex - offset];
           if (prevFrame) {
             img = prevFrame;
@@ -186,7 +176,7 @@ export default function CanvasSequence({ frameCount }: CanvasSequenceProps) {
         const { width, height } = dimensionsRef.current;
         const imgAspect = img.width / img.height;
         const canvasAspect = width / height;
-        
+
         let drawWidth, drawHeight, offsetX, offsetY;
 
         if (canvasAspect > imgAspect) {
@@ -201,44 +191,41 @@ export default function CanvasSequence({ frameCount }: CanvasSequenceProps) {
           offsetY = (height - drawHeight) / 2;
         }
 
-        // Fill background first (faster than clearRect for full canvas)
         ctxRef.current.fillStyle = '#050505';
         ctxRef.current.fillRect(0, 0, width, height);
-        
-        // Draw the image
         ctxRef.current.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-        
+
         lastFrameRef.current = frameIndex;
       }
-      
+
       animationId = requestAnimationFrame(render);
     };
 
     animationId = requestAnimationFrame(render);
-    
+
     return () => {
       window.removeEventListener('resize', resize);
       cancelAnimationFrame(animationId);
     };
   }, [initialLoadComplete, smoothProgress, frameCount]);
 
-  // Loading screen with progress
+  // Loading screen
   if (!initialLoadComplete) {
     const loadProgress = Math.round((loadedCount / INITIAL_LOAD_COUNT) * 100);
-    
+
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#050505] z-50">
         <div className="text-white/50 tracking-widest text-sm mb-8">
           LOADING EXPERIENCE
         </div>
-        
+
         <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
-          <div 
+          <div
             className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-200 ease-out"
             style={{ width: `${loadProgress}%` }}
           />
         </div>
-        
+
         <div className="text-white/30 text-xs mt-4 font-mono">
           {loadProgress}%
         </div>
@@ -247,13 +234,22 @@ export default function CanvasSequence({ frameCount }: CanvasSequenceProps) {
   }
 
   return (
-    <canvas 
-      ref={canvasRef} 
-      className="fixed inset-0 w-full h-full object-contain pointer-events-none"
-      style={{ 
-        zIndex: 0,
-        willChange: 'contents'  // Hint to browser for optimization
-      }} 
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        className="fixed inset-0 w-full h-full object-contain pointer-events-none"
+        style={{ zIndex: 0, willChange: 'contents' }}
+      />
+
+      {/* Background loading indicator - subtle, non-blocking */}
+      {!allLoaded && (
+        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 bg-black/50 px-3 py-2 rounded-full backdrop-blur-sm">
+          <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" />
+          <span className="text-white/50 text-xs">
+            Loading: {Math.round((loadedCount / frameCount) * 100)}%
+          </span>
+        </div>
+      )}
+    </>
   );
 }
