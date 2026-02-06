@@ -137,7 +137,7 @@ export default function StoryOverlay() {
             <div>
               <h4 className="text-lg font-medium text-white mb-2">Hi-Res Audio</h4>
               <p className="text-sm text-white/40 leading-relaxed">
-                Experience up to 40kHz frequency response. Hear the breath between notes.
+                Experience up to 20kHz frequency response. Hear the breath between notes.
               </p>
             </div>
             <div>

@@ -10,7 +10,7 @@ const specs = [
         category: "Audio",
         items: [
             { label: "Driver Unit", value: "40mm dome type (CCAW Voice coil)" },
-            { label: "Frequency Response", value: "4Hz-40,000Hz" },
+            { label: "Frequency Response", value: "20Hz-20,000Hz" },
             { label: "Impedance", value: "47Ω (1kHz) (when connecting via headphone cable with the unit turned on)" },
             { label: "Sensitivity", value: "104 dB/mW" },
         ]
